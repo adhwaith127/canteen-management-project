@@ -22,7 +22,9 @@ class UserModel(AbstractUser):
         return f"{self.username} ({self.user_role})"
 
 
+
 class Company(models.Model):
+
     user = models.OneToOneField(UserModel, on_delete=models.CASCADE, related_name='company_admin')
     registration_id=models.CharField(max_length =100,null=True,blank =True,unique=True)
     name = models.CharField(max_length=100)
@@ -36,7 +38,9 @@ class Company(models.Model):
         return self.name
 
 
+
 class Branch(models.Model):
+
     user = models.OneToOneField(UserModel, on_delete=models.CASCADE, related_name='branch_admin')
     registration_id=models.CharField(max_length =100,null=True,blank =True,unique=True)
     name = models.CharField(max_length=100)
@@ -49,24 +53,28 @@ class Branch(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
+
         return f"{self.name} - {self.company.name if self.company else 'No Company'}"
-    
+
 
 class Department(models.Model):
+
     name = models.CharField(max_length=100)
     branch = models.ForeignKey('Branch', on_delete=models.SET_NULL,null=True, blank=True, related_name='branch_departments')
     company=models.ForeignKey('Company',on_delete=models.SET_NULL,null=True, blank=True,related_name='company_departments')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    is_custom = models.BooleanField(default=False)   
-    
+    is_custom = models.BooleanField(default=False)
+
     class Meta:
         constraints=models.UniqueConstraint(fields=['name','company', 'branch'],name='unique_department_per_branch')
 
     def __str__(self):
         return f"{self.name}"
 
+
 class Canteen(models.Model):
+
     name = models.CharField(max_length=100)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='company_canteens')
     is_active = models.BooleanField(default=True)
@@ -76,8 +84,9 @@ class Canteen(models.Model):
     def __str__(self):
         return self.name
 
-    
+
 class CanteenProfile(models.Model):
+
     name=models.CharField(max_length=100)
     canteen=models.ManyToManyField(Canteen,related_name='canteen_profiles')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -107,9 +116,6 @@ class Employee(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return f"{self.name} ({self.employee_id})"
-    
     class Meta:
         indexes = [
             models.Index(fields=['biometric_id']),
@@ -117,8 +123,11 @@ class Employee(models.Model):
             models.Index(fields=['branch', 'is_active']),
             models.Index(fields=['department', 'is_active']),
             models.Index(fields=['created_at']),
-        ]
-    
+            ]
+
+    def __str__(self):
+
+        return f"{self.name} ({self.employee_id})"
 
 class Device(models.Model):
     serial_number = models.CharField(max_length=100, unique=True)
@@ -139,13 +148,14 @@ class Printer(models.Model):
         return self.serial_number
 
 
+
 class MealLog(models.Model):
     class MEALTYPE (models.TextChoices):
-       BREAKFAST =  'breakfast', 'Breakfast'
-       LUNCH =  'lunch', 'Lunch'
-       SNACKS =  'snacks', 'Snacks'
-       DINNER =  'dinner', 'Dinner'
-       SPECIAL = 'special', 'Special Meal'        
+        BREAKFAST = 'breakfast', 'Breakfast'
+        LUNCH = 'lunch', 'Lunch'
+        SNACKS = 'snacks', 'Snacks'
+        DINNER = 'dinner', 'Dinner'
+        SPECIAL = 'special', 'Special Meal'
 
     employee = models.ForeignKey('Employee', on_delete=models.CASCADE, related_name='employee_meal_logs')
     device = models.ForeignKey('Device', on_delete=models.SET_NULL, null=True, blank=True,related_name='device_logs')
@@ -160,6 +170,6 @@ class MealLog(models.Model):
             models.Index(fields=['employee', 'meal_type', 'created_at']),
             models.Index(fields=['device', 'created_at']),
         ]
-    
+
     def __str__(self):
-        return f"{self.employee} - {self.meal_type} token generated @ {self.created_at}"
+        return f"{self.employee} - {self.meal_type} token generated @ {self.created_at}" 
